@@ -1,0 +1,28 @@
+name: Deploy to Hugging Face Spaces
+
+on:
+  push:
+    branches:
+      - main # when main branch is pushed
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Git
+        run: |
+          git config --global user.email "action@github.com"
+          git config --global user.name "GitHub Action"
+
+      - name: Push to Hugging Face Space
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }} # use hf_token from GitHub secrets
+        run: |
+          # add huggingface space as remote
+          git remote add space https://baxin:${HF_TOKEN}@huggingface.co/spaces/baxin/recipe_infographic          
+          git push --force space main
