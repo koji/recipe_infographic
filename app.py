@@ -1,9 +1,10 @@
 import streamlit as st
 from cerebras.cloud.sdk import Cerebras
 import openai
+from prompt import RECIPE_BASE_PROMPT
 
 # Set page configuration
-st.set_page_config(page_icon="🤖", layout="wide", page_title="Cerebras")
+st.set_page_config(page_icon="🤖", layout="wide", page_title="Recipe Infographic Prompt Generator")
 
 
 def icon(emoji: str):
@@ -113,7 +114,9 @@ if prompt := st.chat_input("Enter your prompt here..."):
             # Stream the response
             for chunk in client.chat.completions.create(
                 model=model_option,
-                messages=[{"role": "user", "content": prompt}],
+                messages=[
+                  {"role": "system", "content": RECIPE_BASE_PROMPT},
+                  {"role": "user", "content": prompt}],
                 max_tokens=max_tokens,
                 stream=True,  # Ensure Cerebras API supports streaming
                 # base_url=BASE_URL
