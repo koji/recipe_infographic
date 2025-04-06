@@ -20,6 +20,13 @@ load_dotenv()
 st.set_page_config(page_icon="🤖", layout="wide", page_title="Recipe Infographic Prompt Generator")
 
 
+def contains_injection_keywords(text):
+    """Checks for basic prompt injection keywords."""
+    keywords = ["ignore previous", "ignore instructions", "disregard", "forget your instructions", "act as", "you must", "system prompt:"]
+    lower_text = text.lower()
+    return any(keyword in lower_text for keyword in keywords)
+
+
 def icon(emoji: str):
     """Shows an emoji as a Notion-style page icon."""
     st.write(
@@ -29,7 +36,7 @@ def icon(emoji: str):
 
 
 # Display header
-icon("🧠 ✖️ 🧑‍🍳")
+icon("🧠 x 🧑‍🍳")
 st.title("Recipe Infographic Prompt Generator")
 st.subheader("Simply enter a dish name or recipe to easily generate image prompts for stunning recipe infographics", divider="orange", anchor=False)
 
@@ -143,7 +150,12 @@ for message in st.session_state.messages:
 
 # --- チャット入力と処理 ---
 if prompt := st.chat_input("Enter food name/food recipe here..."):
-    st.session_state.messages.append({"role": "user", "content": prompt})
+    if contains_injection_keywords(prompt):
+        st.error("Your input seems to contain instructions. Please provide only the dish name or recipe.", icon="🚨")
+    elif len(prompt) > 4000:
+        st.error("Input is too long. Please provide a shorter recipe or dish name.", icon="🚨")
+    else:    
+        st.session_state.messages.append({"role": "user", "content": prompt})
 
     with st.chat_message("user", avatar='🦔'):
         st.markdown(prompt)
@@ -188,7 +200,21 @@ if prompt := st.chat_input("Enter food name/food recipe here..."):
                     response_placeholder.markdown(full_response + "▌") # カーソル表示
 
             # 最終的な応答を表示（カーソルなし）
+            # check the output for expected keywords
             response_placeholder.markdown(full_response)
+            expected_keywords = ["infographic", "step-by-step", "ingredient", "layout", "minimal style"]
+            lower_response = full_response.lower()
+            
+            is_valid_format = any(keyword in lower_response for keyword in expected_keywords)
+            is_refusal = "please provide a valid food dish name" in lower_response
+            
+            if not is_valid_format and not is_refusal:
+                # 期待される形式でもなく、意図した拒否応答でもない場合
+                st.warning("The generated response might not be in the expected format or could indicate an issue.", icon="⚠️")
+                # ここでユーザーに追加の注意を促したり、ログに記録したりする
+            elif is_refusal:
+                 st.info("The model determined the input was not a valid recipe/dish name.") # ユーザーに分かりやすく通知
+            
             # アシスタントの応答を履歴に追加
             st.session_state.messages.append(
                 {"role": "assistant", "content": full_response})
