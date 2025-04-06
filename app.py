@@ -29,9 +29,9 @@ def icon(emoji: str):
 
 
 # Display header
-icon("🧠🧑‍🍳")
-st.title("ChatBot with Cerebras API")
-st.subheader("Deploying Cerebras on Streamlit", divider="orange", anchor=False)
+icon("🧠 ✖️ 🧑‍🍳")
+st.title("Recipe Infographic Prompt Generator")
+st.subheader("Simply enter a dish name or recipe to easily generate image prompts for stunning recipe infographics", divider="orange", anchor=False)
 
 # Define model details
 models = {
@@ -142,7 +142,7 @@ for message in st.session_state.messages:
         st.markdown(message["content"])
 
 # --- チャット入力と処理 ---
-if prompt := st.chat_input("Enter your prompt here..."):
+if prompt := st.chat_input("Enter food name/food recipe here..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
 
     with st.chat_message("user", avatar='🦔'):
