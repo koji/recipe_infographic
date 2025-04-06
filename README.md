@@ -1,6 +1,6 @@
 ---
 title: Recipe infographic
-emoji: 😻
+emoji:   🤖
 colorFrom: purple
 colorTo: blue
 sdk: streamlit
