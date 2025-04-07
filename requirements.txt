@@ -1,3 +1,5 @@
 cerebras_cloud_sdk
 openai
 python-dotenv
+together
+Pillow
