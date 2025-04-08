@@ -9,6 +9,7 @@ from together import Together # Together AI SDKを追加
 
 # config
 import config
+import utils 
 
 # --- RECIPE_BASE_PROMPT のインポート ---
 try:
@@ -24,43 +25,13 @@ load_dotenv()
 # --- Streamlit ページ設定 ---
 st.set_page_config(page_icon="🤖", layout="wide", page_title="Recipe Infographic Prompt Generator")
 
-# --- ヘルパー関数 ---
-def contains_injection_keywords(text):
-    keywords = ["ignore previous", "ignore instructions", "disregard", "forget your instructions", "act as", "you must", "system prompt:"]
-    lower_text = text.lower()
-    return any(keyword in lower_text for keyword in keywords)
-
 def icon(emoji: str):
     st.write(
         f'<span style="font-size: 78px; line-height: 1">{emoji}</span>',
         unsafe_allow_html=True,
     )
 
-# --- 画像生成関数 ---
-@st.cache_data(show_spinner="Generating image...") # 結果をキャッシュ & スピナー表示
-def generate_image_from_prompt(_together_client, prompt_text):
-    """Generates an image using Together AI and returns image bytes."""
-    try:
-        response = _together_client.images.generate(
-            prompt=prompt_text,
-            model=config.IMAGE_MODEL,
-            width=config.IMAGE_WIDTH, 
-            height=config.IMAGE_HEIGHT,
-            steps=config.IMAGE_STEPS,    
-            n=1,
-            response_format=config.IMAGE_RESPONSE_FORMAT,
-            # stop=[] # stopは通常不要
-        )
-        if response.data and response.data[0].b64_json:
-            b64_data = response.data[0].b64_json
-            image_bytes = base64.b64decode(b64_data)
-            return image_bytes
-        else:
-            st.error("Image generation failed: No image data received.")
-            return None
-    except Exception as e:
-        st.error(f"Image generation error: {e}", icon="🚨")
-        return None
+
 
 # --- UI 表示 ---
 icon("🧠 x 🧑‍🍳")
@@ -175,7 +146,7 @@ for idx, message in enumerate(st.session_state.messages):
                  button_key = f"gen_img_{idx}"
                  if st.button("Generate Image ✨", key=button_key):
                      # 画像生成関数を呼び出し、結果をセッション状態に保存
-                     image_bytes = generate_image_from_prompt(image_client, message["content"])
+                     image_bytes = utils.generate_image_from_prompt(image_client, message["content"])
                      if image_bytes:
                          st.session_state.generated_images[idx] = image_bytes
                      # ボタンが押されたら再実行されるので、画像表示は下のブロックで行う
@@ -195,7 +166,7 @@ for idx, message in enumerate(st.session_state.messages):
 # --- チャット入力と新しいメッセージの処理 ---
 if prompt := st.chat_input("Enter food name/food recipe here..."):
     # 入力検証
-    if contains_injection_keywords(prompt):
+    if utils.contains_injection_keywords(prompt):
         st.error("Your input seems to contain instructions. Please provide only the dish name or recipe.", icon="🚨")
     elif len(prompt) > 4000:
         st.error("Input is too long. Please provide a shorter recipe or dish name.", icon="🚨")
@@ -256,7 +227,7 @@ if prompt := st.chat_input("Enter food name/food recipe here..."):
                 if image_client and not is_refusal_check:
                     button_key = f"gen_img_{new_message_idx}"
                     if st.button("Generate Image ✨", key=button_key):
-                        image_bytes = generate_image_from_prompt(image_client, full_response)
+                        image_bytes = utils.generate_image_from_prompt(image_client, full_response)
                         if image_bytes:
                             st.session_state.generated_images[new_message_idx] = image_bytes
                         # 再実行ループで画像表示
