@@ -35,3 +35,10 @@ def generate_image_from_prompt(_together_client, prompt_text):
     except Exception as e:
         st.error(f"Image generation error: {e}", icon="🚨")
         return None
+
+
+def display_icon(emoji: str):
+    st.write(
+        f'<span style="font-size: 78px; line-height: 1">{emoji}</span>',
+        unsafe_allow_html=True,
+    )

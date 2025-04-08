@@ -25,16 +25,8 @@ load_dotenv()
 # --- Streamlit ページ設定 ---
 st.set_page_config(page_icon="🤖", layout="wide", page_title="Recipe Infographic Prompt Generator")
 
-def icon(emoji: str):
-    st.write(
-        f'<span style="font-size: 78px; line-height: 1">{emoji}</span>',
-        unsafe_allow_html=True,
-    )
-
-
-
 # --- UI 表示 ---
-icon("🧠 x 🧑‍🍳")
+utils.display_icon("🧠 x 🧑‍🍳")
 st.title("Recipe Infographic Prompt Generator")
 st.subheader("Simply enter a dish name or recipe to easily generate image prompts for stunning recipe infographics", divider="orange", anchor=False)
 
