@@ -7,6 +7,9 @@ import base64 # 画像デコード用に追加
 from io import BytesIO # 画像ダウンロード用に追加
 from together import Together # Together AI SDKを追加
 
+# config
+import config
+
 # --- RECIPE_BASE_PROMPT のインポート ---
 try:
     from prompt import RECIPE_BASE_PROMPT
@@ -14,13 +17,6 @@ except ImportError:
     st.error("Error: 'prompt.py' not found or 'RECIPE_BASE_PROMPT' is not defined within it.")
     st.stop()
 
-# --- 定数と設定 ---
-models = {
-    "llama3.1-8b": {"name": "Llama3.1-8b", "tokens": 8192, "developer": "Meta"},
-    "llama-3.3-70b": {"name": "Llama-3.3-70b", "tokens": 8192, "developer": "Meta"}
-}
-BASE_URL = "http://localhost:8000/v1"
-IMAGE_MODEL = "black-forest-labs/FLUX.1-schnell-Free" # 使用する画像生成モデル
 
 # --- 環境変数読み込み ---
 load_dotenv()
@@ -47,12 +43,12 @@ def generate_image_from_prompt(_together_client, prompt_text):
     try:
         response = _together_client.images.generate(
             prompt=prompt_text,
-            model=IMAGE_MODEL,
-            width=1024,
-            height=768, # モデルに合わせて調整が必要な場合あり
-            steps=4,    # モデルに合わせて調整が必要な場合あり
+            model=config.IMAGE_MODEL,
+            width=config.IMAGE_WIDTH, 
+            height=config.IMAGE_HEIGHT,
+            steps=config.IMAGE_STEPS,    
             n=1,
-            response_format="b64_json",
+            response_format=config.IMAGE_RESPONSE_FORMAT,
             # stop=[] # stopは通常不要
         )
         if response.data and response.data[0].b64_json:
@@ -103,13 +99,13 @@ with st.sidebar:
     # Model selection
     model_option = st.selectbox(
         "Choose a LLM model:", # ラベルを明確化
-        options=list(models.keys()),
-        format_func=lambda x: models[x]["name"],
+        options=list(config.MODELS.keys()),
+        format_func=lambda x: config.MODELS[x]["name"],
         key="model_select"
     )
 
     # Max tokens slider
-    max_tokens_range = models[model_option]["tokens"]
+    max_tokens_range = config.MODELS[model_option]["tokens"]
     default_tokens = min(2048, max_tokens_range)
     max_tokens = st.slider(
         "Max Tokens (LLM):", # ラベルを明確化
@@ -134,7 +130,7 @@ if not cerebras_api_key:
 try:
     # Cerebras Client
     if use_optillm:
-        llm_client = openai.OpenAI(base_url=BASE_URL, api_key=cerebras_api_key)
+        llm_client = openai.OpenAI(base_url=config.BASE_URL, api_key=cerebras_api_key)
     else:
         llm_client = Cerebras(api_key=cerebras_api_key)
 
