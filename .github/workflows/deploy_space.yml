@@ -24,5 +24,5 @@ jobs:
           HF_TOKEN: ${{ secrets.HF_TOKEN }} # use hf_token from GitHub secrets
         run: |
           # add huggingface space as remote
-          git remote add space https://baxin:${HF_TOKEN}@huggingface.co/spaces/baxin/recipe_infographic          
+          git remote add space https://baxin:${HF_TOKEN}@huggingface.co/spaces/baxin/image_prompt_generator   
           git push --force space main

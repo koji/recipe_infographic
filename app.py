@@ -11,12 +11,12 @@ from together import Together  # Together AI SDKを追加
 import config
 import utils
 
-# --- RECIPE_BASE_PROMPT のインポート ---
+# --- BASE_PROMPT のインポート ---
 try:
-    from prompt import RECIPE_BASE_PROMPT
+    from prompt import BASE_PROMPT
 except ImportError:
     st.error(
-        "Error: 'prompt.py' not found or 'RECIPE_BASE_PROMPT' is not defined within it.")
+        "Error: 'prompt.py' not found or 'BASE_PROMPT' is not defined within it.")
     st.stop()
 
 
@@ -189,7 +189,7 @@ if prompt := st.chat_input("Enter food name/food recipe here..."):
                 full_response = ""
 
                 messages_for_api = [
-                    {"role": "system", "content": RECIPE_BASE_PROMPT},
+                    {"role": "system", "content": BASE_PROMPT},
                     {"role": "user", "content": prompt}
                 ]
                 stream_kwargs = {
